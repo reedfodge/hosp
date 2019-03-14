@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      display:grid;
+      grid-template-columns: 75% 25%;
+      grid-template-rows: 15% 60% 15% 10%;
+      /* grid-template-columns: [map] 75% [pane] 25%;
+      grid-template-rows: [seach] 15% [listpane] 60% [image] 15% [contact] 10%;
+      grid-template-areas:
+        "map seachpane"
+        "map listpane"
+        "map image"
+        "map contact"; */
+    }
+
+    .container div:nth-child(even) {
+      background-color:red;
+    }
+
+    .container div:nth-child(odd) {
+      background-color:blue;
+    }
+
+    /* .map {
+      grid-area: map;
+      grid-column: 1/1;
+      grid-row: 1/4;
+    }
+
+    .searchpane {
+      grid-area: searchpane;
+      grid-column: 2/2;
+      grid-row: 1/1;
+    }
+
+    .listpane {
+      grid-area: listpane;
+      grid-column: 2/2;
+      grid-row: 2/2;
+    }
+
+    .image {
+      grid-area: image;
+      grid-column: 2/2;
+      grid-row: 3/3;
+    }
+
+    .contact {
+      grid-area: conact;
+      grid-column: 2/2;
+      grid-row: 4/4;
+    } */
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- <div class="map">
+      <img src="https://i.imgur.com/sTQ604X.jpg">
+    </div>
+    <div class="searchpane">
+      <img src="https://i.imgur.com/qUQcC4Z.jpg">
+    </div>
+    <div class="listpane">
+      <img src="https://i.imgur.com/6MkRnrY.jpg">
+    </div>
+    <div class="image">
+      <img src="https://i.imgur.com/EkgwRw7.jpg">
+    </div>
+    <div class="contact">
+      <img src="https://i.imgur.com/FQPW8El.jpg">
+    </div> -->
+    <div>1</div>
+    <div>2</div>
+    <div>3</div>
+    <div>4</div>
+    <div>5</div>
+  </div>
+</body>
+</html>

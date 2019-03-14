@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    function haversine(props) {
+        var r = 6372.8
+        var phi1 = props.lat2.toRadians();
+        var phi2 = props.lat1.toRadians();
+        var deltPhi = (props.lat1-props.lat2).toRadians();
+        var deltLmd = (props.lng1-props.lng2).toRadians();
+
+        var a = Math.sin(deltPhi/2) * Math.sin(deltPhi/2) +
+                Math.cos(phi1) * Math.cos(phi2) *
+                Math.sin(deltLmd/2) * Math.sin(deltLmd/2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        var d = r * c;
+        return d;
+    }
+  </script>
+</body>
+</html>
