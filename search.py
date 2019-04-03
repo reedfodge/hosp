@@ -1,4 +1,4 @@
-from google import google
+from googlesearch import search
 import mysql.connector
 
 mydb = mysql.connector.connect(
@@ -20,22 +20,24 @@ for x in myresult:
 websiteList = [e[3:len(e)-3] for e in websiteList]
 PDFresultsList = []
 CSVresultsList = []
-XLsresultsList = []
+XLSresultsList = []
 XLSXresultsList = []
+XMLresultsList = []
 
 for y in websiteList:
-    PDFsearch_results = ("site:" + y + " filetype:pdf")
-    CSVsearch_results = ("site:" + y + " filetype:csv")
-    XLSsearch_results = ("site:" + y + " filetype:xls")
-    XLSXsearch_results = ("site:" + y + " filetype:xlsx")
-    for url in search(PDFsearch_results):
-        PDFresultsList.append(url)
-    for url in search(CSVsearch_results):
-        CSVresultsList.append(url)
-    for url in search(XLSsearch_results):
-        XLsresultsList.append(url)
-    for url in search(XLSXsearch_results):
-        XLSXresultsList.append(url)
-
-for z in PDFresultsList:
-    print(z)
+    print('------')
+    PDFquery = "site:" + y + " filetype:pdf"
+    CSVquery = "site:" + y + " filetype:csv"
+    XLSquery = "site:" + y + " filetype:xls"
+    XLSXquery = "site:" + y + " filetype:xlsx"
+    XMLquery = "site:" + y + " filetype:xml"
+    for a in search(PDFquery, tld="co.in", num=10, stop=1, pause=2) :
+        print(a)
+    for b in search(CSVquery, tld="co.in", num=10, stop=1, pause=2) :
+        print(b)
+    for c in search(XLSquery, tld="co.in", num=10, stop=1, pause=2) :
+        print(c)
+    for d in search(XLSXquery, tld="co.in", num=10, stop=1, pause=2) :
+        print(d)
+    for e in search(XMLquery, tld="co.in", num=10, stop=1, pause=2) :
+        print(e)

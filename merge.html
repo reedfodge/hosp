@@ -9,9 +9,18 @@
   <script src="jquery-3.3.1.min.js"></script>
   <link rel="icon" href="https://i.imgur.com/yf9c6Ae.png">
   <style>
+    *{
+      margin: 0;
+      padding: 0;
 
+    }
     #map {
-      height:98vh;
+      height:100vh;
+      width:100%;
+      float: left;
+    }
+    #map.active {
+      height:100vh;
       width:75%;
       float: left;
     }
@@ -52,17 +61,20 @@
       display:block;
       margin-left: auto;
       margin-right: auto;
+      height:25%;
+      width:25%;
     }
 
     .searchTerm {
       float: right;
-      width: 24%;
+      width: 24vw;
       border: 3px solid ##00B4CC;
       padding: 5px;
       height: 30px;
       border-radius: 5px;
       outline: none;
       color: #9DBFAF;
+      margin-bottom: 20px;
     }
 
     .modal {
@@ -102,7 +114,7 @@
 
     .searchButton {
       position: absolute;
-      right: 8px;
+      right:1px;
       height: 45px;
       width: 40px;
       border: 1px solid #00B4CC;
@@ -112,6 +124,36 @@
       border-radius: 5px;
       cursor: pointer;
       font-size: 20px;
+    }
+
+    #sidebar {
+      position: fixed;
+      transform:translateX(-300%);
+      width:25vw;
+      height:100vh;
+      background-color:#AAAAAA;
+    }
+
+    #sidebar.active {
+      transform:translateX(300%);
+    }
+
+   .toggleButton {
+      position:absolute;
+      left: 97vw;
+      bottom:45vh;
+    }
+
+    #toggleButton.active {
+      left:72vw;
+    }
+
+    .toggleButton span {
+      display: block;
+      width:150px;
+      height:150px;
+      background-color: #AAAAAA;
+      border-radius:50%;
     }
 
     .progressForward {
@@ -152,7 +194,7 @@
   </script>
 </head>
 <body bgcolor="#333333">
-  <div id="map">
+  <div id="map" class="map">
     <script>
       var userdistance;
       function initMap() {
@@ -492,8 +534,6 @@
 
           marker.addListener('click', function(){
             infoWindow.close();
-            map.setZoom(16);
-            map.panTo(marker.position);
             infoWindow.open(map, marker);
           });
       }
@@ -545,128 +585,162 @@
     }
     </script>
   </div>
-  <div id="search_pane">
-    <input type="text" class="searchTerm" id="search_term" placeholder="Enter CPT Code">
-    <button id="test" type="submit" class="searchButton" onclick="findPrices();"></button>
-    <br>      </br>
-    <script>
-      var cptTextInput = document.getElementById("search_term");
-      cptTextInput.addEventListener("keyup", function(event) {
-        if(event.keyCode == 13) {
-          event.preventDefault();
-          document.getElementById("test").click();
+  <div class="toggleButton" id="toggleButton" onclick="toggleSidebar();">
+    <span class="dot"></span>
+  </div>
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+      document.getElementById('map').classList.toggle('active');
+      document.getElementById('toggleButton').classList.toggle('active');
+    }
+  </script>
+  <div id="sidebar">
+    <div id="search_pane">
+      <input type="text" class="searchTerm" id="search_term" placeholder="Enter CPT Code">
+      <button id="test" type="submit" class="searchButton" onclick="findPrices();"></button>
+      <br>      </br>
+      <script>
+        var cptTextInput = document.getElementById("search_term");
+        cptTextInput.addEventListener("keyup", function(event) {
+          if(event.keyCode == 13) {
+            event.preventDefault();
+            document.getElementById("test").click();
+          }
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        var coords = urlParams.get('latitude');
+        var userlat = parseFloat(coords);
+        var indexlng = coords.indexOf('longitude')+10;
+        var userlng = parseFloat(coords.slice(indexlng, coords.length-1));
+
+        function toRad(coord) {
+          var pi = Math.PI;
+          return coord * (pi/180);
         }
-      });
 
-      const urlParams = new URLSearchParams(window.location.search);
-      var coords = urlParams.get('latitude');
-      var userlat = parseFloat(coords);
-      var indexlng = coords.indexOf('longitude')+10;
-      var userlng = parseFloat(coords.slice(indexlng, coords.length-1));
+        function haversine(props) {
+          var r = 6372.8
+          var phi1 = toRad(userlat);
+          var phi2 = toRad(props.lat);
+          var deltPhi = toRad((props.lat-userlat));
+          var deltLmd = toRad((props.lng-userlng));
 
-      function toRad(coord) {
-        var pi = Math.PI;
-        return coord * (pi/180);
-      }
+          var a = Math.sin(deltPhi/2) * Math.sin(deltPhi/2) +
+                  Math.cos(phi1) * Math.cos(phi2) *
+                  Math.sin(deltLmd/2) * Math.sin(deltLmd/2);
+          var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-      function haversine(props) {
-        var r = 6372.8
-        var phi1 = toRad(userlat);
-        var phi2 = toRad(props.lat);
-        var deltPhi = toRad((props.lat-userlat));
-        var deltLmd = toRad((props.lng-userlng));
+          var d = r * c;
+          return d;
+        }
 
-        var a = Math.sin(deltPhi/2) * Math.sin(deltPhi/2) +
-                Math.cos(phi1) * Math.cos(phi2) *
-                Math.sin(deltLmd/2) * Math.sin(deltLmd/2);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-        var d = r * c;
-        return d;
-      }
-
-      var hospPage = 1;
-      var hospCount = 0;
-      var localHospitalArr = [];
+        var hospPage = 1;
+        var hospCount = 0;
+        var localHospitalArr = [];
 
 
 
-      function findNearHospitals() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'hospitals.json', true);
+        function findNearHospitals() {
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', 'hospitals.json', true);
 
-        xhr.onload = function() {
-          if(this.status == 200) {
-            var text = JSON.parse(this.responseText);
-            for(var i in text) {
-              if(haversine({lat:text[i].LATITUDE,lng:text[i].LONGITUDE}) <= userdistance) {
-                localHospitalArr.push(text[i].NAME);
-                hospList.push(text[i].NAME);
-                if(hospCount < browserLimit) {
-                  addNames({name:text[i].NAME});
-                  hospCount++;
+          xhr.onload = function() {
+            if(this.status == 200) {
+              var text = JSON.parse(this.responseText);
+              for(var i in text) {
+                if(haversine({lat:text[i].LATITUDE,lng:text[i].LONGITUDE}) <= userdistance) {
+                  localHospitalArr.push(text[i].NAME);
+                  hospList.push(text[i].NAME);
+                  if(hospCount < browserLimit) {
+                    addNames({name:text[i].NAME});
+                    hospCount++;
+                  }
                 }
               }
             }
           }
+          xhr.send();
         }
-        xhr.send();
-      }
 
-      var hospList = [];
+        var hospList = [];
 
-      function addNames(props) {
-        var txt = document.createElement("h4");
-        txt.innerHTML = props.name;
-        hosp.appendChild(txt);
-        hospList.push(props.name);
-      }
+        function addNames(props) {
+          var txt = document.createElement("h4");
+          txt.innerHTML = props.name;
+          txt.setAttribute("style", "border-bottom: 1px solid rgba(100, 100, 100, 0.3); padding: 10px 10px;");
+          hosp.appendChild(txt);
+          hospList.push(props.name);
+        }
 
-      var browserLimit = parseInt((window.innerHeight * 0.6)/50);
+        var browserLimit = parseInt((window.innerHeight * 0.6)/40);
 
-      function progressForward() {
-        if(localHospitalArr.length > browserLimit) {
-          if(hospPage*browserLimit < (localHospitalArr.length-1)) {
-            document.getElementById('hosp').innerHTML = "";
-            for(var i  = hospPage*browserLimit; i < (hospPage+1)*browserLimit; i++) {
-              if(localHospitalArr[i].value != "undefined") {
+        function progressForward() {
+          if(localHospitalArr.length > browserLimit) {
+            if(hospPage*browserLimit < (localHospitalArr.length-1)) {
+              document.getElementById('hosp').innerHTML = "";
+              for(var i  = hospPage*browserLimit; i < (hospPage+1)*browserLimit; i++) {
+                if(localHospitalArr[i].value != "undefined") {
+                  addNames({name:localHospitalArr[i]});
+                }
+              }
+              hospPage++;
+            }
+            else {
+              for(var i = hospPage*browserLimit; i < localHospitalArr.length-1; i++) {
                 addNames({name:localHospitalArr[i]});
               }
             }
-            hospPage++;
           }
-          else {
-            for(var i = hospPage*browserLimit; i < localHospitalArr.length-1; i++) {
-              addNames({name:localHospitalArr[i]});
+        }
+
+        function progressBack() {
+          if(localHospitalArr.length > browserLimit) {
+            if(hospPage >= 2) {
+              console.log('test');
+              document.getElementById('hosp').innerHTML = "";
+              for(var i = (hospPage-2)*browserLimit; i < browserLimit*(hospPage-1); i++) {
+                addNames({name:localHospitalArr[i]});
+              }
+              hospPage--;
+            }
+            else {
+              document.getElementById('hosp').innerHTML = "";
+              for(var i = 0; i < browserLimit; i++) {
+                addNames({name:localHospitalArr[i]});
+              }
             }
           }
         }
-      }
 
-      function progressBack() {
-        if(localHospitalArr.length > browserLimit) {
-          if(hospPage >= 2) {
-            console.log('test');
-            document.getElementById('hosp').innerHTML = "";
-            for(var i = (hospPage-2)*browserLimit; i < browserLimit*(hospPage-1); i++) {
-              addNames({name:localHospitalArr[i]});
+        var drgList = [];
+
+        function findDRG() {
+          var search = document.getElementById("search_term").value;
+          if(search != "") {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'cpt.json', true);
+
+            xhr.onload = function() {
+              if(this.status == 200) {
+                var text = JSON.parse(this.responseText);
+                for(var i in text) {
+                  if(text[i].cpt == search) {
+                    drgList.push(text[i].drg.substring(4, 7));
+                  }
+                }
+              }
             }
-            hospPage--;
           }
-          else {
-            document.getElementById('hosp').innerHTML = "";
-            for(var i = 0; i < browserLimit; i++) {
-              addNames({name:localHospitalArr[i]});
-            }
-          }
+          xhr.send();
         }
-      }
 
-      var drgList = [];
 
-      function findDRG() {
-        var search = document.getElementById("search_term").value;
-        if(search != "") {
+        var cptDescript;
+
+        function getCPTDescript() {
+          var search = document.getElementById("search_term").value;
           var xhr = new XMLHttpRequest();
           xhr.open('GET', 'cpt.json', true);
 
@@ -675,96 +749,75 @@
               var text = JSON.parse(this.responseText);
               for(var i in text) {
                 if(text[i].cpt == search) {
-                  drgList.push(text[i].drg.substring(4, 7));
+                  cptDescript = text[i].description;
+                  console.log(cptDescript);
                 }
               }
             }
           }
+          xhr.send();
         }
-        xhr.send();
-      }
 
-
-      var cptDescript;
-
-      function getCPTDescript() {
-        var search = document.getElementById("search_term").value;
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'cpt.json', true);
-
-        xhr.onload = function() {
-          if(this.status == 200) {
-            var text = JSON.parse(this.responseText);
-            for(var i in text) {
-              if(text[i].cpt == search) {
-                cptDescript = text[i].description;
-                console.log(cptDescript);
-              }
-            }
+        function findPrices() {
+          findDRG();
+          getCPTDescript();
+          for(var i in drgList) {
+            console.log(drgList[i]);
           }
-        }
-        xhr.send();
-      }
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', 'ipps.json', true);
 
-      function findPrices() {
-        findDRG();
-        getCPTDescript();
-        for(var i in drgList) {
-          console.log(drgList[i]);
-        }
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'ipps.json', true);
-
-        xhr.onload = function() {
-          if(this.status==200) {
-            var text = JSON.parse(this.responseText);
-            for(var i in text) {
-              for(var k in drgList) {
-                if(text[i].drg.substring(0, 3) == drgList[k]) {
-                  for(var j in hospList) {
-                    if(text[i].name == hospList[j]) {
-                      var name = document.createElement("h2");
-                      var cptCode = document.createElement("h3");
-                      var acc = document.createElement("p");
-                      var atp = document.createElement("p");
-                      var amp = document.createElement("p");
-                      name.innerHTML = text[i].name;
-                      cptCode.innerHTML = "Charges for " + cptDescript;
-                      acc.innerHTML = "Average Covered Charges: $" + text[i].avgCoveredCharges;
-                      atp.innerHTML = "Average Total Payments: $" + text[i].avgTotalPayments;
-                      amp.innerHTML = "Average Medicare Payments: $" + text[i].avgMedicarePayments;
-                      modalText.appendChild(name);
-                      modalText.appendChild(cptCode);
-                      modalText.appendChild(acc);
-                      modalText.appendChild(atp);
-                      modalText.appendChild(amp);
-                      modal.style.display = "block";
+          xhr.onload = function() {
+            if(this.status==200) {
+              var text = JSON.parse(this.responseText);
+              for(var i in text) {
+                for(var k in drgList) {
+                  if(text[i].drg.substring(0, 3) == drgList[k]) {
+                    for(var j in hospList) {
+                      if(text[i].name == hospList[j]) {
+                        var name = document.createElement("h2");
+                        var cptCode = document.createElement("h3");
+                        var acc = document.createElement("p");
+                        var atp = document.createElement("p");
+                        var amp = document.createElement("p");
+                        name.innerHTML = text[i].name;
+                        cptCode.innerHTML = "Charges for " + cptDescript;
+                        acc.innerHTML = "Average Covered Charges: $" + text[i].avgCoveredCharges;
+                        atp.innerHTML = "Average Total Payments: $" + text[i].avgTotalPayments;
+                        amp.innerHTML = "Average Medicare Payments: $" + text[i].avgMedicarePayments;
+                        modalText.appendChild(name);
+                        modalText.appendChild(cptCode);
+                        modalText.appendChild(acc);
+                        modalText.appendChild(atp);
+                        modalText.appendChild(amp);
+                        modal.style.display = "block";
+                      }
                     }
                   }
                 }
               }
             }
           }
+          xhr.send();
         }
-        xhr.send();
-      }
 
 
-    </script>
-  </div>
-  <div id="listPane">
-    <p id="hosp" color:"#ffffff"></p>
-  </div>
-  <div>
-    <button id="progressBack" class="progressBack"; onclick="progressBack();"><</button>
-    <button id="progressForward" class="progressForward"; onclick="progressForward();">></button>
-  </div>
-  <div id="img">
-    <img src="https://i.imgur.com/h8uRjXn.png" alt="logo" align="center">
-  </div>
-  <div class="text">
-    <p>Contact: admin@hosp.us</p>
-    <p>Copyright (c) 2019 Reed Fodge All Rights Reserved.</p>
+      </script>
+    </div>
+    <div id="listPane">
+      <p id="hosp" color:"#ffffff"></p>
+    </div>
+    <div>
+      <button id="progressBack" class="progressBack"; onclick="progressBack();"><</button>
+      <button id="progressForward" class="progressForward"; onclick="progressForward();">></button>
+    </div>
+    <div id="img">
+      <img src="https://i.imgur.com/h8uRjXn.png" alt="logo" align="center">
+    </div>
+    <div class="text">
+      <p>Contact: admin@hosp.us</p>
+      <p>Copyright (c) 2019 Reed Fodge All Rights Reserved.</p>
+    </div>
   </div>
   <div id="myModal" class="modal">
     <div class="modal-content">

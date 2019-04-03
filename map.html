@@ -1,5 +1,4 @@
-
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -9,8 +8,18 @@
   <script src="jquery-3.3.1.min.js"></script>
   <link rel="icon" href="https://i.imgur.com/yf9c6Ae.png">
   <style>
+    *{
+      margin: 0;
+      padding: 0;
+
+    }
     #map {
-      height:98vh;
+      height:100vh;
+      width:100%;
+      float: left;
+    }
+    #map.active {
+      height:100vh;
       width:75%;
       float: left;
     }
@@ -57,13 +66,14 @@
 
     .searchTerm {
       float: right;
-      width: 24%;
+      width: 24vw;
       border: 3px solid ##00B4CC;
       padding: 5px;
       height: 30px;
       border-radius: 5px;
       outline: none;
       color: #9DBFAF;
+      margin-bottom: 20px;
     }
 
     .modal {
@@ -103,13 +113,69 @@
 
     .searchButton {
       position: absolute;
-      right: 8px;
+      right:1px;
       height: 45px;
       width: 40px;
       border: 1px solid #00B4CC;
       background: #00B4CC;
       text-align: center;
       color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    #sidebar {
+      position: fixed;
+      transform:translateX(-300%);
+      width:25vw;
+      height:100vh;
+      background-color:#AAAAAA;
+    }
+
+    #sidebar.active {
+      transform:translateX(300%);
+    }
+
+   .toggleButton {
+      position:absolute;
+      left: 97vw;
+      bottom:45vh;
+    }
+
+    #toggleButton.active {
+      left:72vw;
+    }
+
+    .toggleButton span {
+      display: block;
+      width:150px;
+      height:150px;
+      background-color: #AAAAAA;
+      border-radius:50%;
+    }
+
+    .progressForward {
+      float:right;
+      height:45px;
+      width:100px;
+      background: #00B4CC;
+      text-align: center;
+      color: #fff;
+      border: 1px solid #00B4CC;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    .progressBack {
+      float:left;
+      height:45px;
+      width:100px;
+      background: #00B4CC;
+      text-align: center;
+      color: #fff;
+      border: 1px solid #00B4CC;
       border-radius: 5px;
       cursor: pointer;
       font-size: 20px;
@@ -127,9 +193,10 @@
   </script>
 </head>
 <body bgcolor="#333333">
-  <div id="map">
+  <div id="map" class="map">
     <script>
       var userdistance;
+      var markerList = [];
       function initMap() {
         const urlParams = new URLSearchParams(window.location.search);
         var coords = urlParams.get('latitude');
@@ -153,302 +220,222 @@
           streetViewControl:false,
           fullscreenControl:false,
           styles: [
-            {
-                "featureType": "all",
-                "elementType": "labels",
-                "stylers": [
-                    {
-                        "visibility": "on"
-                    }
-                ]
-            },
-            {
-                "featureType": "all",
-                "elementType": "labels.text.fill",
-                "stylers": [
-                    {
-                        "saturation": 36
-                    },
-                    {
-                        "color": "#000000"
-                    },
-                    {
-                        "lightness": 40
-                    }
-                ]
-            },
-            {
-                "featureType": "all",
-                "elementType": "labels.text.stroke",
-                "stylers": [
-                    {
-                        "visibility": "on"
-                    },
-                    {
-                        "color": "#000000"
-                    },
-                    {
-                        "lightness": 16
-                    }
-                ]
-            },
-            {
-                "featureType": "all",
-                "elementType": "labels.icon",
-                "stylers": [
-                    {
-                        "visibility": "off"
-                    }
-                ]
-            },
-            {
-                "featureType": "administrative",
-                "elementType": "geometry.fill",
-                "stylers": [
-                    {
-                        "color": "#000000"
-                    },
-                    {
-                        "lightness": 20
-                    }
-                ]
-            },
-            {
-                "featureType": "administrative",
-                "elementType": "geometry.stroke",
-                "stylers": [
-                    {
-                        "color": "#000000"
-                    },
-                    {
-                        "lightness": 17
-                    },
-                    {
-                        "weight": 1.2
-                    }
-                ]
-            },
-            {
-                "featureType": "administrative.locality",
-                "elementType": "labels.text.fill",
-                "stylers": [
-                    {
-                        "color": "#c4c4c4"
-                    }
-                ]
-            },
-            {
-                "featureType": "administrative.neighborhood",
-                "elementType": "labels.text.fill",
-                "stylers": [
-                    {
-                        "color": "#707070"
-                    }
-                ]
-            },
-            {
-              "featureType": "administrative.neighborhood",
+          {
+              "featureType": "administrative.province",
+              "elementType": "all",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "landscape",
+              "elementType": "all",
+              "stylers": [
+                  {
+                      "saturation": -100
+                  },
+                  {
+                      "lightness": 65
+                  },
+                  {
+                      "visibility": "on"
+                  }
+              ]
+          },
+          {
+              "featureType": "poi",
+              "elementType": "all",
+              "stylers": [
+                  {
+                      "saturation": -100
+                  },
+                  {
+                      "lightness": 51
+                  },
+                  {
+                      "hue": "#ff0000"
+                  },
+                  {
+                      "visibility": "simplified"
+                  }
+              ]
+          },
+          {
+              "featureType": "poi",
+              "elementType": "labels.text.fill",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.highway",
+              "elementType": "all",
+              "stylers": [
+                  {
+                      "saturation": -100
+                  },
+                  {
+                      "visibility": "simplified"
+                  },
+                  {
+                      "color": "#ffd900"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.highway",
+              "elementType": "geometry.fill",
+              "stylers": [
+                  {
+                      "visibility": "simplified"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.highway",
+              "elementType": "geometry.stroke",
+              "stylers": [
+                  {
+                      "visibility": "simplified"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.highway",
               "elementType": "labels",
               "stylers": [
-                {"visibility": "off"}
+                  {
+                      "visibility": "off"
+                  }
               ]
-            },
-            {
-              "featureType": "administrative.land_parcel",
+          },
+          {
+              "featureType": "road.highway",
+              "elementType": "labels.text.fill",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.highway",
+              "elementType": "labels.text.stroke",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.arterial",
+              "elementType": "all",
+              "stylers": [
+                  {
+                      "saturation": -100
+                  },
+                  {
+                      "lightness": 30
+                  },
+                  {
+                      "visibility": "simplified"
+                  },
+                  {
+                      "color": "#ffe761"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.local",
+              "elementType": "all",
+              "stylers": [
+                  {
+                      "saturation": -100
+                  },
+                  {
+                      "lightness": 40
+                  },
+                  {
+                      "visibility": "simplified"
+                  },
+                  {
+                      "color": "#bfbfbf"
+                  }
+              ]
+          },
+          {
+              "featureType": "transit",
+              "elementType": "all",
+              "stylers": [
+                  {
+                      "saturation": -100
+                  },
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "water",
+              "elementType": "geometry",
+              "stylers": [
+                  {
+                      "saturation": -50
+                  },
+                  {
+                      "lightness": -30
+                  },
+                  {
+                      "color": "##587786"
+                  }
+              ]
+          },
+          {
+              "featureType": "water",
               "elementType": "labels",
               "stylers": [
-                { "visibility": "off" }
+                  {
+                      "visibility": "on"
+                  },
+                  {
+                      "lightness": -25
+                  },
+                  {
+                      "saturation": -100
+                  },
+                  {
+                      "color": "#050505"
+                  }
               ]
-            },
-            {
-                "featureType": "landscape",
-                "elementType": "geometry",
-                "stylers": [
-                    {
-                        "color": "#000000"
-                    },
-                    {
-                        "lightness": 20
-                    }
-                ]
-            },
-            {
-                "featureType": "poi",
-                "elementType": "geometry",
-                "stylers": [
-                    {
-                        "color": "#000000"
-                    },
-                    {
-                        "lightness": 21
-                    },
-                    {
-                        "visibility": "on"
-                    }
-                ]
-            },
-            {
-                "featureType": "poi.business",
-                "elementType": "geometry",
-                "stylers": [
-                    {
-                        "visibility": "on"
-                    }
-                ]
-            },
-            {
-                "featureType": "road.highway",
-                "elementType": "geometry.fill",
-                "stylers": [
-                    {
-                        "color": "#be2026"
-                    },
-                    {
-                        "lightness": "0"
-                    },
-                    {
-                        "visibility": "on"
-                    }
-                ]
-            },
-            {
-                "featureType": "road.highway",
-                "elementType": "geometry.stroke",
-                "stylers": [
-                    {
-                        "visibility": "off"
-                    }
-                ]
-            },
-            {
-                "featureType": "road.highway",
-                "elementType": "labels.text.fill",
-                "stylers": [
-                    {
-                        "visibility": "off"
-                    }
-                ]
-            },
-            {
-                "featureType": "road.highway",
-                "elementType": "labels.text.stroke",
-                "stylers": [
-                    {
-                        "visibility": "off"
-                    },
-                    {
-                        "hue": "#ff000a"
-                    }
-                ]
-            },
-            {
-                "featureType": "road.arterial",
-                "elementType": "geometry",
-                "stylers": [
-                    {
-                        "color": "#000000"
-                    },
-                    {
-                        "lightness": 18
-                    }
-                ]
-            },
-            {
-                "featureType": "road.arterial",
-                "elementType": "geometry.fill",
-                "stylers": [
-                    {
-                        "color": "#575757"
-                    }
-                ]
-            },
-            {
-                "featureType": "road.arterial",
-                "elementType": "labels.text.fill",
-                "stylers": [
-                    {
-                        "color": "#ffffff"
-                    }
-                ]
-            },
-            {
-                "featureType": "road.arterial",
-                "elementType": "labels.text.stroke",
-                "stylers": [
-                    {
-                        "color": "#2c2c2c"
-                    }
-                ]
-            },
-            {
-                "featureType": "road.local",
-                "elementType": "geometry",
-                "stylers": [
-                    {
-                        "color": "#000000"
-                    },
-                    {
-                        "lightness": 16
-                    }
-                ]
-            },
-            {
-                "featureType": "road.local",
-                "elementType": "labels.text.fill",
-                "stylers": [
-                    {
-                        "color": "#999999"
-                    }
-                ]
-            },
-            {
-                "featureType": "road.local",
-                "elementType": "labels.text.stroke",
-                "stylers": [
-                    {
-                        "saturation": "-52"
-                    }
-                ]
-            },
-            {
-                "featureType": "transit",
-                "elementType": "geometry",
-                "stylers": [
-                    {
-                        "color": "#000000"
-                    },
-                    {
-                        "lightness": 19
-                    }
-                ]
-            },
-            {
-                "featureType": "water",
-                "elementType": "geometry",
-                "stylers": [
-                    {
-                        "color": "#000000"
-                    },
-                    {
-                        "lightness": 17
-                    }
-                ]
-            }
-          ]
+          },
+          {
+              "featureType": "water",
+              "elementType": "labels.text.stroke",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          }
+      ]
         }
 
 
         var map = new google.maps.Map(document.getElementById('map'), options);
 
         var icon = {
-          url:"https://i.ibb.co/2jKvj2h/hospital-logo.png",
+          url:"https://i.imgur.com/HcfMASi.png",
           scaledSize: new google.maps.Size(50,50),
           origin: new google.maps.Point(0,0),
           anchor: new google.maps.Point(0,0)
         };
 
         var icon2 = {
-          url:"https://i.ibb.co/Drtn3jV/hospital-logo-2.png",
+          url:"https://i.imgur.com/YveIKYV.png",
           scaledSize: new google.maps.Size(50,50),
           origin: new google.maps.Point(0,0),
           anchor: new google.maps.Point(0,0)
@@ -461,14 +448,14 @@
             icon:props.image
           });
 
+          markerList.push(marker);
+
           var infoWindow = new google.maps.InfoWindow({
             content:props.descript
           });
 
           marker.addListener('click', function(){
             infoWindow.close();
-            map.setZoom(16);
-            map.panTo(marker.position);
             infoWindow.open(map, marker);
           });
       }
@@ -503,6 +490,7 @@
         findNearHospitals();
         xhr.send();
       }
+
       function addCircle() {
         var distCircle = new google.maps.Circle({
           strokeColor: '#00B4CC',
@@ -520,89 +508,178 @@
     }
     </script>
   </div>
-  <div id="search_pane">
-    <input type="text" class="searchTerm" id="search_term" placeholder="Enter CPT Code">
-    <button id="test" type="submit" class="searchButton" onclick="findPrices();"></button>
-    <br>      </br>
-    <p id="hosp" color:"#ffffff"></p>
-    <script>
-      var cptTextInput = document.getElementById("search_term");
-      cptTextInput.addEventListener("keyup", function(event) {
-        if(event.keyCode == 13) {
-          event.preventDefault();
-          document.getElementById("test").click();
+  <div class="toggleButton" id="toggleButton" onclick="toggleSidebar();">
+    <span class="dot"></span>
+  </div>
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+      document.getElementById('map').classList.toggle('active');
+      document.getElementById('toggleButton').classList.toggle('active');
+    }
+  </script>
+  <div id="sidebar">
+    <div id="search_pane">
+      <input type="text" class="searchTerm" id="search_term" placeholder="Enter CPT Code">
+      <button id="test" type="submit" class="searchButton" onclick="findPrices();"></button>
+      <br>      </br>
+      <script>
+        var cptTextInput = document.getElementById("search_term");
+        cptTextInput.addEventListener("keyup", function(event) {
+          if(event.keyCode == 13) {
+            event.preventDefault();
+            document.getElementById("test").click();
+          }
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        var coords = urlParams.get('latitude');
+        var userlat = parseFloat(coords);
+        var indexlng = coords.indexOf('longitude')+10;
+        var userlng = parseFloat(coords.slice(indexlng, coords.length-1));
+
+        function toRad(coord) {
+          var pi = Math.PI;
+          return coord * (pi/180);
         }
-      });
 
-      const urlParams = new URLSearchParams(window.location.search);
-      var coords = urlParams.get('latitude');
-      var userlat = parseFloat(coords);
-      var indexlng = coords.indexOf('longitude')+10;
-      var userlng = parseFloat(coords.slice(indexlng, coords.length-1));
+        function haversine(props) {
+          var r = 6372.8
+          var phi1 = toRad(userlat);
+          var phi2 = toRad(props.lat);
+          var deltPhi = toRad((props.lat-userlat));
+          var deltLmd = toRad((props.lng-userlng));
 
-      function toRad(coord) {
-        var pi = Math.PI;
-        //console.log(pi);
-        return coord * (pi/180);
-      }
+          var a = Math.sin(deltPhi/2) * Math.sin(deltPhi/2) +
+                  Math.cos(phi1) * Math.cos(phi2) *
+                  Math.sin(deltLmd/2) * Math.sin(deltLmd/2);
+          var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-      function haversine(props) {
-        //console.log(userlat);
-        //console.log(userlng);
-        var r = 6372.8
-        var phi1 = toRad(userlat);
-        //console.log(phi1);
-        var phi2 = toRad(props.lat);
-        //console.log(phi2);
-        var deltPhi = toRad((props.lat-userlat));
-        //console.log(deltPhi);
-        var deltLmd = toRad((props.lng-userlng));
-        //console.log(deltLmd);
+          var d = r * c;
+          return d;
+        }
 
-        var a = Math.sin(deltPhi/2) * Math.sin(deltPhi/2) +
-                Math.cos(phi1) * Math.cos(phi2) *
-                Math.sin(deltLmd/2) * Math.sin(deltLmd/2);
-        //console.log(a);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        //console.log(c);
+        var hospPage = 1;
+        var hospCount = 0;
+        var localHospitalArr = [];
 
-        var d = r * c;
-        //console.log(d);
-        return d;
-      }
 
-      function findNearHospitals() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'hospitals.json', true);
 
-        xhr.onload = function() {
-          if(this.status == 200) {
-            var text = JSON.parse(this.responseText);
-            for(var i in text) {
-              if(haversine({lat:text[i].LATITUDE,lng:text[i].LONGITUDE}) <= userdistance) {
-                //console.log(text[i].NAME);
-                addNames({name:text[i].NAME});
+        function findNearHospitals() {
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', 'hospitals.json', true);
+
+          xhr.onload = function() {
+            if(this.status == 200) {
+              var text = JSON.parse(this.responseText);
+              for(var i in text) {
+                if(haversine({lat:text[i].LATITUDE,lng:text[i].LONGITUDE}) <= userdistance) {
+                  localHospitalArr.push(text[i].NAME);
+                  hospList.push(text[i].NAME);
+                  if(hospCount < browserLimit) {
+                    addNames({name:text[i].NAME});
+                    hospCount++;
+                  }
+                }
+              }
+            }
+          }
+          xhr.send();
+        }
+
+        var hospList = [];
+
+        function openMarker(name) {
+          for(var i = 0; i < markerList.length; i++) {
+            if(markerList[i].name == name) {
+              var infoWindow = new google.maps.InfoWindow({
+                content:markerList[i].descript
+              });
+
+              markerList[i].addListener('click', function(){
+                infoWindow.close();
+                infoWindow.open(map, markerList[i]);
+              });
+            }
+          }
+        }
+
+        function addNames(props) {
+          var txt = document.createElement("h4");
+          txt.innerHTML = props.name;
+          txt.setAttribute("style", "border-bottom: 1px solid rgba(100, 100, 100, 0.3); padding: 10px 10px;");
+          txt.setAttribute("onclick", "openMarker(" + props.name.value + ")");
+          hosp.appendChild(txt);
+          hospList.push(props.name);
+        }
+
+        var browserLimit = parseInt((window.innerHeight * 0.6)/40);
+
+        function progressForward() {
+          if(localHospitalArr.length > browserLimit) {
+            if(hospPage*browserLimit < (localHospitalArr.length-1)) {
+              document.getElementById('hosp').innerHTML = "";
+              for(var i  = hospPage*browserLimit; i < (hospPage+1)*browserLimit; i++) {
+                if(localHospitalArr[i].value != "undefined") {
+                  addNames({name:localHospitalArr[i]});
+                }
+              }
+              hospPage++;
+            }
+            else {
+              for(var i = hospPage*browserLimit; i < localHospitalArr.length-1; i++) {
+                addNames({name:localHospitalArr[i]});
               }
             }
           }
         }
-        xhr.send();
-      }
 
-      var hospList = [];
+        function progressBack() {
+          if(localHospitalArr.length > browserLimit) {
+            if(hospPage >= 2) {
+              console.log('test');
+              document.getElementById('hosp').innerHTML = "";
+              for(var i = (hospPage-2)*browserLimit; i < browserLimit*(hospPage-1); i++) {
+                addNames({name:localHospitalArr[i]});
+              }
+              hospPage--;
+            }
+            else {
+              document.getElementById('hosp').innerHTML = "";
+              for(var i = 0; i < browserLimit; i++) {
+                addNames({name:localHospitalArr[i]});
+              }
+            }
+          }
+        }
 
-      function addNames(props) {
-        var txt = document.createElement("h4");
-        txt.innerHTML = props.name;
-        hosp.appendChild(txt);
-        hospList.push(props.name);
-      }
+        var drgList = [];
 
-      var drgList = [];
+        function findDRG() {
+          var search = document.getElementById("search_term").value;
+          if(search != "") {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'cpt.json', true);
 
-      function findDRG() {
-        var search = document.getElementById("search_term").value;
-        if(search != "") {
+            xhr.onload = function() {
+              if(this.status == 200) {
+                var text = JSON.parse(this.responseText);
+                for(var i in text) {
+                  if(text[i].cpt == search) {
+                    drgList.push(text[i].drg.substring(4, 7));
+                  }
+                }
+              }
+            }
+          }
+          xhr.send();
+        }
+
+
+        var cptDescript;
+
+        function getCPTDescript() {
+          var search = document.getElementById("search_term").value;
           var xhr = new XMLHttpRequest();
           xhr.open('GET', 'cpt.json', true);
 
@@ -611,91 +688,75 @@
               var text = JSON.parse(this.responseText);
               for(var i in text) {
                 if(text[i].cpt == search) {
-                  //console.log(text[i].drg.substring(4, 7));
-                  drgList.push(text[i].drg.substring(4, 7));
+                  cptDescript = text[i].description;
+                  console.log(cptDescript);
                 }
               }
             }
           }
+          xhr.send();
         }
-        xhr.send();
-      }
 
-
-      var cptDescript;
-
-      function getCPTDescript() {
-        var search = document.getElementById("search_term").value;
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'cpt.json', true);
-
-        xhr.onload = function() {
-          if(this.status == 200) {
-            var text = JSON.parse(this.responseText);
-            for(var i in text) {
-              if(text[i].cpt == search) {
-                cptDescript = text[i].description;
-                console.log(cptDescript);
-              }
-            }
+        function findPrices() {
+          findDRG();
+          getCPTDescript();
+          for(var i in drgList) {
+            console.log(drgList[i]);
           }
-        }
-        xhr.send();
-      }
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', 'ipps.json', true);
 
-      function findPrices() {
-        findDRG();
-        getCPTDescript();
-        //console.log('find price');
-        for(var i in drgList) {
-          console.log(drgList[i]);
-        }
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'ipps.json', true);
-
-        xhr.onload = function() {
-          if(this.status==200) {
-            var text = JSON.parse(this.responseText);
-            for(var i in text) {
-              for(var k in drgList) {
-                if(text[i].drg.substring(0, 3) == drgList[k]) {
-                  for(var j in hospList) {
-                    if(text[i].name == hospList[j]) {
-                      var name = document.createElement("h2");
-                      var cptCode = document.createElement("h3");
-                      var acc = document.createElement("p");
-                      var atp = document.createElement("p");
-                      var amp = document.createElement("p");
-                      name.innerHTML = text[i].name;
-                      cptCode.innerHTML = "Charges for " + cptDescript;
-                      acc.innerHTML = "Average Covered Charges: $" + text[i].avgCoveredCharges;
-                      atp.innerHTML = "Average Total Payments: $" + text[i].avgTotalPayments;
-                      amp.innerHTML = "Average Medicare Payments: $" + text[i].avgMedicarePayments;
-                      modalText.appendChild(name);
-                      modalText.appendChild(cptCode);
-                      modalText.appendChild(acc);
-                      modalText.appendChild(atp);
-                      modalText.appendChild(amp);
-                      modal.style.display = "block";
+          xhr.onload = function() {
+            if(this.status==200) {
+              var text = JSON.parse(this.responseText);
+              for(var i in text) {
+                for(var k in drgList) {
+                  if(text[i].drg.substring(0, 3) == drgList[k]) {
+                    for(var j in hospList) {
+                      if(text[i].name == hospList[j]) {
+                        var name = document.createElement("h2");
+                        var cptCode = document.createElement("h3");
+                        var acc = document.createElement("p");
+                        var atp = document.createElement("p");
+                        var amp = document.createElement("p");
+                        name.innerHTML = text[i].name;
+                        cptCode.innerHTML = "Charges for " + cptDescript;
+                        acc.innerHTML = "Average Covered Charges: $" + text[i].avgCoveredCharges;
+                        atp.innerHTML = "Average Total Payments: $" + text[i].avgTotalPayments;
+                        amp.innerHTML = "Average Medicare Payments: $" + text[i].avgMedicarePayments;
+                        modalText.appendChild(name);
+                        modalText.appendChild(cptCode);
+                        modalText.appendChild(acc);
+                        modalText.appendChild(atp);
+                        modalText.appendChild(amp);
+                        modal.style.display = "block";
+                      }
                     }
                   }
                 }
               }
             }
           }
+          xhr.send();
         }
-        xhr.send();
-      }
 
 
-    </script>
-  </div>
-  <div id="img">
-    <img src="http://i.imgur.com/0nr4Haw.jpg" alt="logo" align="center">
-  </div>
-  <div class="text">
-    <p>Contact: admin@hosp.us</p>
-    <p>Copyright (c) 2019 Reed Fodge All Rights Reserved.</p>
+      </script>
+    </div>
+    <div id="listPane">
+      <p id="hosp" color:"#ffffff"></p>
+    </div>
+    <div>
+      <button id="progressBack" class="progressBack"; onclick="progressBack();"><</button>
+      <button id="progressForward" class="progressForward"; onclick="progressForward();">></button>
+    </div>
+    <div id="img">
+      <img src="https://i.imgur.com/h8uRjXn.png" alt="logo" align="center">
+    </div>
+    <div class="text">
+      <p>Contact: admin@hosp.us</p>
+      <p>Copyright (c) 2019 Reed Fodge All Rights Reserved.</p>
+    </div>
   </div>
   <div id="myModal" class="modal">
     <div class="modal-content">

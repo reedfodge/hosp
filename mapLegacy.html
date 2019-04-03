@@ -9,7 +9,6 @@
   <script src="jquery-3.3.1.min.js"></script>
   <link rel="icon" href="https://i.imgur.com/yf9c6Ae.png">
   <style>
-
     #map {
       height:98vh;
       width:75%;
@@ -52,6 +51,8 @@
       display:block;
       margin-left: auto;
       margin-right: auto;
+      height:25%;
+      width:25%;
     }
 
     .searchTerm {
@@ -109,32 +110,6 @@
       background: #00B4CC;
       text-align: center;
       color: #fff;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 20px;
-    }
-
-    .progressForward {
-      float:right;
-      height:45px;
-      width:100px;
-      background: #00B4CC;
-      text-align: center;
-      color: #fff;
-      border: 1px solid #00B4CC;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 20px;
-    }
-
-    .progressBack {
-      float:left;
-      height:45px;
-      width:100px;
-      background: #00B4CC;
-      text-align: center;
-      color: #fff;
-      border: 1px solid #00B4CC;
       border-radius: 5px;
       cursor: pointer;
       font-size: 20px;
@@ -492,8 +467,6 @@
 
           marker.addListener('click', function(){
             infoWindow.close();
-            map.setZoom(16);
-            map.panTo(marker.position);
             infoWindow.open(map, marker);
           });
       }
@@ -549,6 +522,7 @@
     <input type="text" class="searchTerm" id="search_term" placeholder="Enter CPT Code">
     <button id="test" type="submit" class="searchButton" onclick="findPrices();"></button>
     <br>      </br>
+    <p id="hosp" color:"#ffffff"></p>
     <script>
       var cptTextInput = document.getElementById("search_term");
       cptTextInput.addEventListener("keyup", function(event) {
@@ -566,30 +540,34 @@
 
       function toRad(coord) {
         var pi = Math.PI;
+        //console.log(pi);
         return coord * (pi/180);
       }
 
       function haversine(props) {
+        //console.log(userlat);
+        //console.log(userlng);
         var r = 6372.8
         var phi1 = toRad(userlat);
+        //console.log(phi1);
         var phi2 = toRad(props.lat);
+        //console.log(phi2);
         var deltPhi = toRad((props.lat-userlat));
+        //console.log(deltPhi);
         var deltLmd = toRad((props.lng-userlng));
+        //console.log(deltLmd);
 
         var a = Math.sin(deltPhi/2) * Math.sin(deltPhi/2) +
                 Math.cos(phi1) * Math.cos(phi2) *
                 Math.sin(deltLmd/2) * Math.sin(deltLmd/2);
+        //console.log(a);
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        //console.log(c);
 
         var d = r * c;
+        //console.log(d);
         return d;
       }
-
-      var hospPage = 1;
-      var hospCount = 0;
-      var localHospitalArr = [];
-
-
 
       function findNearHospitals() {
         var xhr = new XMLHttpRequest();
@@ -600,12 +578,8 @@
             var text = JSON.parse(this.responseText);
             for(var i in text) {
               if(haversine({lat:text[i].LATITUDE,lng:text[i].LONGITUDE}) <= userdistance) {
-                localHospitalArr.push(text[i].NAME);
-                hospList.push(text[i].NAME);
-                if(hospCount < browserLimit) {
-                  addNames({name:text[i].NAME});
-                  hospCount++;
-                }
+                //console.log(text[i].NAME);
+                addNames({name:text[i].NAME});
               }
             }
           }
@@ -622,46 +596,6 @@
         hospList.push(props.name);
       }
 
-      var browserLimit = parseInt((window.innerHeight * 0.6)/50);
-
-      function progressForward() {
-        if(localHospitalArr.length > browserLimit) {
-          if(hospPage*browserLimit < (localHospitalArr.length-1)) {
-            document.getElementById('hosp').innerHTML = "";
-            for(var i  = hospPage*browserLimit; i < (hospPage+1)*browserLimit; i++) {
-              if(localHospitalArr[i].value != "undefined") {
-                addNames({name:localHospitalArr[i]});
-              }
-            }
-            hospPage++;
-          }
-          else {
-            for(var i = hospPage*browserLimit; i < localHospitalArr.length-1; i++) {
-              addNames({name:localHospitalArr[i]});
-            }
-          }
-        }
-      }
-
-      function progressBack() {
-        if(localHospitalArr.length > browserLimit) {
-          if(hospPage >= 2) {
-            console.log('test');
-            document.getElementById('hosp').innerHTML = "";
-            for(var i = (hospPage-2)*browserLimit; i < browserLimit*(hospPage-1); i++) {
-              addNames({name:localHospitalArr[i]});
-            }
-            hospPage--;
-          }
-          else {
-            document.getElementById('hosp').innerHTML = "";
-            for(var i = 0; i < browserLimit; i++) {
-              addNames({name:localHospitalArr[i]});
-            }
-          }
-        }
-      }
-
       var drgList = [];
 
       function findDRG() {
@@ -675,6 +609,7 @@
               var text = JSON.parse(this.responseText);
               for(var i in text) {
                 if(text[i].cpt == search) {
+                  //console.log(text[i].drg.substring(4, 7));
                   drgList.push(text[i].drg.substring(4, 7));
                 }
               }
@@ -709,6 +644,7 @@
       function findPrices() {
         findDRG();
         getCPTDescript();
+        //console.log('find price');
         for(var i in drgList) {
           console.log(drgList[i]);
         }
@@ -752,15 +688,8 @@
 
     </script>
   </div>
-  <div id="listPane">
-    <p id="hosp" color:"#ffffff"></p>
-  </div>
-  <div>
-    <button id="progressBack" class="progressBack"; onclick="progressBack();"><</button>
-    <button id="progressForward" class="progressForward"; onclick="progressForward();">></button>
-  </div>
   <div id="img">
-    <img src="https://i.imgur.com/h8uRjXn.png" alt="logo" align="center">
+    <img src="http://i.imgur.com/0nr4Haw.jpg" alt="logo" align="center">
   </div>
   <div class="text">
     <p>Contact: admin@hosp.us</p>
