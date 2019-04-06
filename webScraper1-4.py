@@ -7,6 +7,7 @@ from lxml.html import fromstring
 from itertools import cycle
 import traceback
 from bs4 import BeautifulSoup
+from torrequest import TorRequest
 
 def printLogo():
     print(" ___  ___  ________  ________  ________        ________  ________  ________  ________  ________  _______   ________     ")
@@ -35,8 +36,8 @@ proxies = {"134.209.45.249:8080", "134.209.41.247:8080", "104.248.51.135:8080", 
 proxy_pool = cycle(proxies)
 
 proxyA = {
-  "http": "107.172.75.133",
-  "https": "107.172.75.133"
+  "http": "178.128.0.209:8080",
+  "https": "178.128.0.209:8080"
 }
 
 #Connects to MySQL Database
@@ -46,6 +47,8 @@ mydb = mysql.connector.connect(
     passwd="Yy6bxM-G",
     database="hosp"
 )
+
+tr = TorRequest(password='Yy6bxM-G')
 
 #Fetches all of the websites from database
 mycursor = mydb.cursor()
@@ -95,7 +98,7 @@ def getSubPages(response):
 APIRequests = 1
 
 def checkRequests():
-    if APIRequets > 998:
+    if APIRequests > 998:
         sys.exit()
 
 for i in websiteList:
@@ -104,19 +107,20 @@ for i in websiteList:
         sys.stdout.write("\033[K")
     printLogo()
     proxy = next(proxy_pool)
-    response1 = requests.get(i, headers=headers)
+    response1 = requests.get(i)
     print("CONNECTED TO URL")
     checkRequests()
     APIRequests += 1
     dL = []
     sL = []
-    sL1 = getSubPages(response1)
+    sL1 = getSubPages(webPage)
     print("SubList 1 Complete")
     sL2 = []
     sL3 = []
     sL4 = []
     sL5 = []
     sL6 = []
+    time.sleep(5)
     for a in sL1:
         proxy = next(proxy_pool)
         urlA = str(i) + str(a)
@@ -124,11 +128,13 @@ for i in websiteList:
             checkRequests()
             responseA = requests.get(urlA, headers=headers, proxies=proxyA)
             APIRequests += 1
+            time.sleep(2)
         except:
             print("Connection Error")
         sLA = getSubPages(responseA)
         sL2.extend(sLA)
     print("SubList 2 Complete")
+    time.sleep(5)
     for b in sL2:
         proxy = next(proxy_pool)
         urlB = str(i) + str(b)
@@ -136,11 +142,13 @@ for i in websiteList:
             checkRequests()
             responseB = requests.get(urlB, headers=headers, proxies=proxyA)
             APIRequests += 1
+            time.sleep(2)
         except:
             print("Connection Error")
         sLB = getSubPages(responseB)
         sL3.extend(sLB)
     print("SubList 3 Complete")
+    time.sleep(5)
     for c in sL3:
         proxy = next(proxy_pool)
         urlC = str(i) + str(c)
@@ -148,11 +156,13 @@ for i in websiteList:
             checkRequests()
             responseC = requests.get(urlC, headers=headers, proxies=proxyA)
             APIRequests += 1
+            time.sleep(2)
         except:
             print("Connection Error")
         sLA = getSubPages(responseC)
         sL4.extend(sLC)
     print("SubList 4 Complete")
+    time.sleep(5)
     for d in sL4:
         proxy = next(proxy_pool)
         urlD = str(i) + str(d)
@@ -160,11 +170,13 @@ for i in websiteList:
             checkRequests()
             responseD = requests.get(urlD, headers=headers, proxies=proxyA)
             APIRequests += 1
+            time.sleep(2)
         except:
             print("Connection Error")
         sLD = getSubPages(responseD)
         sL5.extend(sLD)
     print("SubList 5 Complete")
+    time.sleep(5)
     for e in sL5:
         proxy = next(proxy_pool)
         urlE = str(i) + str(e)
@@ -172,11 +184,13 @@ for i in websiteList:
             checkRequests()
             responseE = requests.get(urlE, headers=headers, proxies=proxyA)
             APIRequests += 1
+            time.sleep(2)
         except:
             print("Connection Error")
         sLE = getSubPages(responseE)
         sL6.extend(sLE)
     print("SubList 6 Complete")
+    time.sleep(5)
     sL.extend(sL1)
     sL.extend(sL2)
     sL.extend(sL3)
