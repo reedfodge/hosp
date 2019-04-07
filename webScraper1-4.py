@@ -97,20 +97,18 @@ def getSubPages(response):
 
 APIRequests = 1
 
-def checkRequests():
-    if APIRequests > 998:
-        sys.exit()
-
 for i in websiteList:
-    for o in range(0, 32):
+    for o in range(0, 40):
         sys.stdout.write("\033[F")
         sys.stdout.write("\033[K")
     printLogo()
     proxy = next(proxy_pool)
-    response1 = requests.get(i)
-    print("CONNECTED TO URL")
+    try:
+        response1 = requests.get(i)
+        print("CONNECTED TO URL")
+    except:
+        print("CONNECTION ERROR")
     checkRequests()
-    APIRequests += 1
     dL = []
     sL = []
     sL1 = getSubPages(webPage)
@@ -126,8 +124,7 @@ for i in websiteList:
         urlA = str(i) + str(a)
         try:
             checkRequests()
-            responseA = requests.get(urlA, headers=headers, proxies=proxyA)
-            APIRequests += 1
+            responseA = requests.get(urlA, headers=headers)
             time.sleep(2)
         except:
             print("Connection Error")
@@ -140,8 +137,7 @@ for i in websiteList:
         urlB = str(i) + str(b)
         try:
             checkRequests()
-            responseB = requests.get(urlB, headers=headers, proxies=proxyA)
-            APIRequests += 1
+            responseB = requests.get(urlB, headers=headers)
             time.sleep(2)
         except:
             print("Connection Error")
@@ -154,8 +150,7 @@ for i in websiteList:
         urlC = str(i) + str(c)
         try:
             checkRequests()
-            responseC = requests.get(urlC, headers=headers, proxies=proxyA)
-            APIRequests += 1
+            responseC = requests.get(urlC, headers=headers)
             time.sleep(2)
         except:
             print("Connection Error")
@@ -168,8 +163,7 @@ for i in websiteList:
         urlD = str(i) + str(d)
         try:
             checkRequests()
-            responseD = requests.get(urlD, headers=headers, proxies=proxyA)
-            APIRequests += 1
+            responseD = requests.get(urlD, headers=headers)
             time.sleep(2)
         except:
             print("Connection Error")
@@ -182,8 +176,7 @@ for i in websiteList:
         urlE = str(i) + str(e)
         try:
             checkRequests()
-            responseE = requests.get(urlE, headers=headers, proxies=proxyA)
-            APIRequests += 1
+            responseE = requests.get(urlE, headers=headers)
             time.sleep(2)
         except:
             print("Connection Error")
@@ -201,3 +194,4 @@ for i in websiteList:
     dL.extend(dL1)
     for k in dL:
         print(k)
+    print("====================")

@@ -460,35 +460,59 @@
           });
       }
 
-      function initMarkerJSON_USA() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'hospitals.json', true);
+      // function initMarkerJSON_USA() {
+      //   var xhr = new XMLHttpRequest();
+      //   xhr.open('GET', 'hospitals.json', true);
+      //
+      //   xhr.onload = function() {
+      //     if(this.status == 200) {
+      //       var text = JSON.parse(this.responseText);
+      //       for(var i in text) {
+      //         if(text[i].TELEPHONE == "NOT AVAILABLE" || text[i].WEBSITE == "NOT AVAILABLE" || text[i].BEDS == -999) {
+      //           addMarker({
+      //             lat:parseFloat(text[i].LATITUDE),
+      //             lng:parseFloat(text[i].LONGITUDE),
+      //             image:icon,
+      //             descript:'<html><body><h2>' + text[i].NAME + '</h2><p>Phone: ' + text[i].TELEPHONE + '</p><p>Website: ' + text[i].WEBSITE + '</p><p>Bed Count: ' + text[i].BEDS + '</p><i>Chargemaster Coming Soon</i></body></html>'
+      //           });
+      //         }
+      //         else {
+      //           addMarker({
+      //             lat:parseFloat(text[i].LATITUDE),
+      //             lng:parseFloat(text[i].LONGITUDE),
+      //             image:icon2,
+      //             descript:'<html><body><h2>' + text[i].NAME + '</h2><p>Phone: ' + text[i].TELEPHONE + '</p><p>Website: ' + text[i].WEBSITE + '</p><p>Bed Count: ' + text[i].BEDS + '</p><i>Chargemaster Coming Soon</i></body></html>'
+      //           });
+      //         }
+      //       }
+      //     }
+      //   }
+      //   findNearHospitals();
+      //   xhr.send();
+      // }
+      var lhaJSON = [];
 
-        xhr.onload = function() {
-          if(this.status == 200) {
-            var text = JSON.parse(this.responseText);
-            for(var i in text) {
-              if(text[i].TELEPHONE == "NOT AVAILABLE" || text[i].WEBSITE == "NOT AVAILABLE" || text[i].BEDS == -999) {
-                addMarker({
-                  lat:parseFloat(text[i].LATITUDE),
-                  lng:parseFloat(text[i].LONGITUDE),
-                  image:icon,
-                  descript:'<html><body><h2>' + text[i].NAME + '</h2><p>Phone: ' + text[i].TELEPHONE + '</p><p>Website: ' + text[i].WEBSITE + '</p><p>Bed Count: ' + text[i].BEDS + '</p><i>Chargemaster Coming Soon</i></body></html>'
-                });
-              }
-              else {
-                addMarker({
-                  lat:parseFloat(text[i].LATITUDE),
-                  lng:parseFloat(text[i].LONGITUDE),
-                  image:icon2,
-                  descript:'<html><body><h2>' + text[i].NAME + '</h2><p>Phone: ' + text[i].TELEPHONE + '</p><p>Website: ' + text[i].WEBSITE + '</p><p>Bed Count: ' + text[i].BEDS + '</p><i>Chargemaster Coming Soon</i></body></html>'
-                });
-              }
-            }
+      function initMarkerJSON_USABeta() {
+        findNearHospitals();
+        console.log(lhaJSON.length)
+        for(var i in lhaJSON) {
+          if(lhaJSON[i].TELEPHONE == "NOT AVAILABLE" || lhaJSON[i].WEBSITE == "NOT AVAILABLE" || lhaJSON[i].BEDS == -999) {
+            addMarker({
+              lat:parseFloat(text[i].LATITUDE),
+              lng:parseFloat(text[i].LONGITUDE),
+              image:icon,
+              descript:'<html><body><h2>' + lhaJSON[i].NAME + '</h2><p>Phone: ' + lhaJSON[i].TELEPHONE + '</p><p>Website: ' + lhaJSON[i].WEBSITE + '</p><p>Bed Count: ' + lhaJSON[i].BEDS + '</p><i>Chargemaster Coming Soon</i></body></html>'
+            });
+          }
+          else {
+            addMarker({
+              lat:parseFloat(text[i].LATITUDE),
+              lng:parseFloat(text[i].LONGITUDE),
+              image:icon2,
+              descript:'<html><body><h2>' + lhaJSON[i].NAME + '</h2><p>Phone: ' + lhaJSON[i].TELEPHONE + '</p><p>Website: ' + lhaJSON[i].WEBSITE + '</p><p>Bed Count: ' + lhaJSON[i].BEDS + '</p><i>Chargemaster Coming Soon</i></body></html>'
+            });
           }
         }
-        findNearHospitals();
-        xhr.send();
       }
 
       function addCircle() {
@@ -504,7 +528,8 @@
         });
       }
       addCircle();
-      initMarkerJSON_USA();
+      findNearHospitals();
+      initMarkerJSON_USABeta();
     }
     </script>
   </div>
@@ -574,6 +599,7 @@
               var text = JSON.parse(this.responseText);
               for(var i in text) {
                 if(haversine({lat:text[i].LATITUDE,lng:text[i].LONGITUDE}) <= userdistance) {
+                  lhaJSON.push(text[i]);
                   localHospitalArr.push(text[i].NAME);
                   hospList.push(text[i].NAME);
                   if(hospCount < browserLimit) {
